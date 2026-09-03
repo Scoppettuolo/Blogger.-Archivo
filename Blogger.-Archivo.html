@@ -1,0 +1,366 @@
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8"></meta>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"></meta>
+    <title>Archivo Multilingüe para Blogger</title>
+    <style>
+
+/* ────────────────
+   CONTENEDORES
+──────────────── */
+.archive-container {
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    margin: 20px 0;
+}
+
+/* ────────────────
+   TITULOS
+──────────────── */
+TituloH1 {
+    display: block;
+    color: var(--violeta);
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--lila);
+    font-size: 1.6rem;
+    letter-spacing: 0.5em;
+}
+
+/* ────────────────
+   SELECTOR DE IDIOMA
+──────────────── */
+.language-selector {
+    display: block;
+    text-align: center;
+    margin: 2rem;
+}
+
+.language-selector select {
+    padding: 1rem;
+    border-radius: 0;
+    border: 0 solid var(--lila);
+    background-color: transparent;
+    color: var(--violeta-oscuro);
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 80%;
+    text-align: center;
+    letter-spacing: 0.5em;
+}
+
+/* ────────────────
+   ARCHIVE WIDGET FLAT
+──────────────── */
+.archive-widget--flat #archive-container-flat {
+    margin-top: 1rem;
+    line-height: 1.6;
+    font-family: 'Arial', sans-serif;
+}
+
+.archive-widget--flat .yearStyle-flat {
+    cursor: default;
+    padding: 0.6em;
+    margin-top: 0.5em;
+    border-radius: 4px;
+    background-color: var(--violeta);
+    color: var(--lila);
+    font-size: 1.6rem;
+    letter-spacing: 0.5em;
+}
+
+.archive-widget--flat .monthStyle-flat {
+    cursor: default;
+    padding: 0.6em;
+    margin: 0.5em 0 0.5em 0.5rem;
+    border-radius: 4px;
+    background-color: var(--lila);
+    color: var(--violeta);
+    font-size: 1.4rem;
+    letter-spacing: 0.2em;
+}
+
+.archive-widget--flat .dayStyle-flat {
+    display: inline-block;
+    color: var(--violeta);
+    margin-right: 0.8em;
+    font-size: 1.3rem;
+    font-weight: bold;
+    min-width: 40px;
+}
+
+.archive-widget--flat .post-entry-flat {
+    margin: 0.7rem 0 0.7rem 1.5rem;
+    padding: 0.5rem;
+    border-left: 3px solid var(--lila);
+    transition: background-color 0.3s;
+    font-size: 1.2rem;
+}
+
+.archive-widget--flat .post-entry-flat:hover {
+    background-color: var(--lila);
+    border-left-color: var(--violeta);
+}
+
+.archive-widget--flat .post-entry-flat a {
+    color: var(--violeta-oscuro);
+    text-decoration: none;
+    transition: color 0.2s;
+    font-weight: 500;
+}
+
+.archive-widget--flat .post-entry-flat a:hover {
+    color: var(--violeta);
+    text-decoration: underline;
+}
+
+/* ────────────────
+   UTILIDADES
+──────────────── */
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: var(--violeta);
+    font-style: italic;
+}
+
+.post-count {
+    font-size: 0.9em;
+    color: #777;
+    margin-left: 10px;
+    font-weight: normal;
+}
+
+/* ────────────────
+   RESPONSIVE
+──────────────── */
+@media (max-width: 768px) {
+    .archive-widget--flat .yearStyle-flat {
+        font-size: 1.4rem;
+        padding: 0.6em;
+    }
+
+    .archive-widget--flat .monthStyle-flat {
+        font-size: 1.2rem;
+    }
+
+    body {
+        padding: 10px;
+    }
+
+    .language-selector select {
+        width: 90%;
+        max-width: 250px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <tituloh1>Archivo <span class="post-count" id="post-count"></span></tituloh1>
+    
+    <div class="language-selector">
+        <select id="language-select">
+            <option value="auto">Idioma</option>
+            <option value="es">Castellano / Español</option>
+			<option value="de">Deutsch</option>
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="it">Italiano</option>
+			<option value="la">Latín</option>
+            <option value="pt">Português</option>
+			<option value="ru">Русский (Ruso)</option>
+            <option value="ja">日本語 (Japonés)</option>
+            <option value="zh">中文 (Chino)</option>
+            <option value="ko">한국어 (Coreano)</option>
+            <option value="th">ไทย (Tailandés)</option>
+        </select>
+    </div>
+    
+    <div class="archive-container">
+        <div class="archive-widget archive-widget--flat">
+            <div id="archive-container-flat">
+                <div class="loading">Cargando entradas...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Variables globales para acumular los posts
+    var allTitles = [];
+    var allURLs = [];
+    var allYears = [];
+    var allMonths = [];
+    var allDays = [];
+    var allFullDates = [];
+    var totalPosts = 0;
+    var postsLoaded = 0;
+    var currentLanguage = 'auto';
+
+    // Detectar idioma del navegador
+    function getBrowserLanguage() {
+        return navigator.language || navigator.userLanguage || 'es';
+    }
+
+    // Mapeo manual para latín (no soportado por toLocaleString)
+    const latinMonths = [
+        'Ianuarius', 'Februarius', 'Martius', 'Aprilis', 'Maius', 'Iunius',
+        'Iulius', 'Augustus', 'September', 'October', 'November', 'December'
+    ];
+    
+    const latinDays = [
+        'Dies Solis', 'Dies Lunae', 'Dies Martis', 'Dies Mercurii', 
+        'Dies Iovis', 'Dies Veneris', 'Dies Saturni'
+    ];
+
+    // Formatear nombres de mes y día según el idioma seleccionado
+    function getMonthName(monthNum, language) {
+        if (language === 'la') {
+            return latinMonths[monthNum - 1] || '';
+        }
+        
+        try {
+            const date = new Date(2000, monthNum - 1, 1);
+            return date.toLocaleString(language, { month: 'long' });
+        } catch (e) {
+            // Fallback a inglés si hay error
+            const date = new Date(2000, monthNum - 1, 1);
+            return date.toLocaleString('en', { month: 'long' });
+        }
+    }
+
+    function getWeekdayName(dateString, language) {
+        if (language === 'la') {
+            const date = new Date(dateString);
+            return latinDays[date.getDay()] || '';
+        }
+        
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleString(language, { weekday: 'long' });
+        } catch (e) {
+            // Fallback a inglés si hay error
+            const date = new Date(dateString);
+            return date.toLocaleString('en', { weekday: 'long' });
+        }
+    }
+
+    function capitalizeFirst(str) {
+        if (!str) return '';
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    // Cargar los posts
+    function LoadTheArchive(feed) {
+        if ("entry" in feed.feed) {
+            var PostEntries = feed.feed.entry.length;
+            for (var PostNum = 0; PostNum < PostEntries; PostNum++) {
+                var ThisPost = feed.feed.entry[PostNum];
+                allTitles.push(ThisPost.title.$t);
+                allYears.push(ThisPost.published.$t.substring(0, 4));
+                allMonths.push(ThisPost.published.$t.substring(5, 7));
+                allDays.push(ThisPost.published.$t.substring(8, 10));
+                allFullDates.push(ThisPost.published.$t);
+                
+                var ThisPostURL;
+                for (var LinkNum = 0; LinkNum < ThisPost.link.length; LinkNum++) {
+                    if (ThisPost.link[LinkNum].rel == "alternate") {
+                        ThisPostURL = ThisPost.link[LinkNum].href;
+                        break;
+                    }
+                }
+                allURLs.push(ThisPostURL);
+            }
+            
+            postsLoaded += PostEntries;
+            
+            // Si es la primera llamada, obtener el total de posts
+            if (totalPosts === 0 && feed.feed.openSearch$totalResults) {
+                totalPosts = parseInt(feed.feed.openSearch$totalResults.$t, 10);
+                document.getElementById('post-count').textContent = '(' + totalPosts + ' entradas)';
+            }
+            
+            // Si hemos cargado todos los posts, renderizar
+            if (totalPosts > 0 && postsLoaded >= totalPosts) {
+                renderArchive();
+            }
+        }
+    }
+
+    // Renderizar el archivo con el idioma seleccionado
+    function renderArchive() {
+        const container = document.getElementById('archive-container-flat');
+        container.innerHTML = '';
+        
+        // Determinar el idioma a usar
+        let displayLanguage = currentLanguage === 'auto' ? getBrowserLanguage() : currentLanguage;
+        
+        // Construir estructura año → mes → posts
+        const archive = {};
+        for (let i = 0; i < allTitles.length; i++) {
+            const y = allYears[i],
+                m = allMonths[i],
+                day = parseInt(allDays[i], 10) > 9 ? allDays[i] : '0' + parseInt(allDays[i], 10),
+                weekday = getWeekdayName(allFullDates[i], displayLanguage);
+
+            if (!archive[y]) archive[y] = {};
+            if (!archive[y][m]) archive[y][m] = [];
+            archive[y][m].push({
+                day: day,
+                weekday: capitalizeFirst(weekday),
+                title: allTitles[i],
+                url: allURLs[i]
+            });
+        }
+
+        // Renderizar siempre desplegado, años y meses ordenados desc.
+        Object.keys(archive)
+            .sort((a, b) => b - a)
+            .forEach(year => {
+                // encabezado de año
+                const yh = document.createElement('div');
+                yh.className = 'yearStyle-flat';
+                yh.textContent = year;
+                container.appendChild(yh);
+
+                Object.keys(archive[year])
+                    .sort((a, b) => b - a)
+                    .forEach(monthNum => {
+                        // encabezado de mes
+                        const mh = document.createElement('div');
+                        mh.className = 'monthStyle-flat';
+                        mh.textContent = capitalizeFirst(getMonthName(parseInt(monthNum, 10), displayLanguage));
+                        container.appendChild(mh);
+
+                        // posts
+                        archive[year][monthNum].forEach(post => {
+                            const entry = document.createElement('div');
+                            entry.className = 'post-entry-flat';
+                            entry.innerHTML =
+                                `<span class="dayStyle-flat">${post.day} - ${post.weekday}</span>` +
+                                `<a href="${post.url}">${post.title}</a>`;
+                            container.appendChild(entry);
+                        });
+                    });
+            });
+    }
+
+    // Configurar el selector de idioma
+    document.getElementById('language-select').addEventListener('change', function() {
+        currentLanguage = this.value;
+        renderArchive();
+    });
+
+    // Establecer el idioma automático por defecto
+    document.getElementById('language-select').value = 'auto';
+    </script>
+
+    <!-- 🔄 Llamadas JSONP -->
+    <script src="/feeds/posts/summary?alt=json-in-script&amp;max-results=150&amp;start-index=1&amp;callback=LoadTheArchive"></script>
+    <script src="/feeds/posts/summary?alt=json-in-script&amp;max-results=150&amp;start-index=151&amp;callback=LoadTheArchive"></script>
+    <script src="/feeds/posts/summary?alt=json-in-script&amp;max-results=150&amp;start-index=301&amp;callback=LoadTheArchive"></script>
+</body>
+</html>
