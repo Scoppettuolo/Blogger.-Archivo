@@ -37,7 +37,8 @@ Widget HTML/JavaScript que genera un archivo de entradas (por año, mes y día) 
 
 - El script carga las entradas de 150 en 150 (hasta 450 con las 3 llamadas incluidas). Si tu blog tiene más de 450 entradas, puedes duplicar la línea del `<script>` aumentando el `start-index`.
 
-<!-- Ejemplo para cargar más entradas -->
+## Ejemplo para cargar más entradas:
+
 <script src="/feeds/posts/summary?alt=json-in-script&amp;max-results=150&amp;start-index=451&amp;callback=LoadTheArchive"></script>
 
 ---
